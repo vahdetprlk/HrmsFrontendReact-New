@@ -6,10 +6,27 @@ import { Button } from "semantic-ui-react";
 import KodlamaioDateInput from "../utilities/customFormControls/KodlamaioDateInput";
 import KodlamaioTextArea from "../utilities/customFormControls/KodlamaioTextArea";
 import KodlamaioSelectInput from "../utilities/customFormControls/KodlamaioSelectInput";
-
+import CityService from "../services/cityService";
 
 export default function JobAdvertForm() {
+  const [cities, setCities] = useState([]);
 
+  useEffect(() => {
+    let cityService = new CityService();
+    cityService.getCity().then((result) => setCities(result.data.data));
+  });
+  // {
+
+  //   "city": {"id": 34},
+  //   "description": "Aranıyor",
+  //   "employer": {"id": 22},
+  //   "id": 0,
+  //   "jobPosition": {"id": 2},
+  //   "openPositionQty": 3,
+  //   "salaryMax": 1500,
+  //   "salaryMin": 2000
+
+  //     }
 
   const initialValues = {
     companyName: "",
@@ -18,7 +35,7 @@ export default function JobAdvertForm() {
     salaryMin: "",
     salaryMax: "",
     openPosition: "",
-    deadlineDate: "",
+    applicationDeadline: "",
     jobPosition: "",
     workType: "",
     workTime: "",
@@ -27,9 +44,6 @@ export default function JobAdvertForm() {
   const schema = Yup.object({
     companyName: Yup.string()
       .max(50, "Must be 50 characters or less")
-      .required("Required"),
-    city: Yup.string()
-      .max(20, "Must be 20 characters or less")
       .required("Required"),
     description: Yup.string()
       .max(1000, "Must be 1000 characters or less")
@@ -47,7 +61,7 @@ export default function JobAdvertForm() {
         validationSchema={schema}
         onSubmit={(values, { setSubmitting }) => {
           setTimeout(() => {
-            alert(JSON.stringify(values, null, 2));
+            console.log(JSON.stringify(values, null, 2));
             setSubmitting(false);
           }, 400);
         }}
@@ -58,11 +72,16 @@ export default function JobAdvertForm() {
             type="text"
             placeholder="Firma Adı Giriniz"
           />
-          <KodlamaioTextInput
-            name="city"
-            type="text"
-            placeholder="Şehir Giriniz"
-          />
+
+          <KodlamaioSelectInput name="city">
+            <option value="">Şehir Seçiniz</option>
+            {cities.map((city) => (
+              <option key={city.id} value={city.id}>
+                {city.name}
+              </option>
+            ))}
+          </KodlamaioSelectInput>
+
           <KodlamaioTextInput
             name="openPosition"
             type="number"
@@ -108,12 +127,12 @@ export default function JobAdvertForm() {
 
           <KodlamaioDateInput
             label="İlan Bitiş Tarihi"
-            name="deadlineDate"
+            name="applicationDeadline"
             type="date"
             placeholder="Tarih Giriniz"
           />
 
-          <Button style={{marginTop: "10px"}} color="green" type="submit">
+          <Button style={{ marginTop: "10px" }} color="green" type="submit">
             Ekle
           </Button>
         </Form>
