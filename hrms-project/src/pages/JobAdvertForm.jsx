@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Formik, Form, useField } from "formik";
+import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import KodlamaioTextInput from "../utilities/customFormControls/KodlamaioTextInput";
 import { Button } from "semantic-ui-react";
@@ -7,26 +7,41 @@ import KodlamaioDateInput from "../utilities/customFormControls/KodlamaioDateInp
 import KodlamaioTextArea from "../utilities/customFormControls/KodlamaioTextArea";
 import KodlamaioSelectInput from "../utilities/customFormControls/KodlamaioSelectInput";
 import CityService from "../services/cityService";
+import JobPositionService from "../services/jobPositionService";
+import WorkTypeService from "../services/workTypeService";
+import WorkTimeService from "../services/workTimeService";
 
 export default function JobAdvertForm() {
   const [cities, setCities] = useState([]);
+  const [jobPositions, setJobPositions] = useState([]);
+  const [workTypes, setWorkTypes] = useState([]);
+  const [workTimes, setWorkTimes] = useState([]);
 
   useEffect(() => {
     let cityService = new CityService();
+
+    let jobPositionService = new JobPositionService();
+
+    let workTypeService = new WorkTypeService();
+
+    let workTimesService = new WorkTimeService();
+
     cityService.getCity().then((result) => setCities(result.data.data));
-  });
-  // {
 
-  //   "city": {"id": 34},
-  //   "description": "Aranıyor",
+    jobPositionService
+      .getJobPosition()
+      .then((result) => setJobPositions(result.data.data));
+
+    workTypeService
+      .getWorkType()
+      .then((result) => setWorkTypes(result.data.data));
+
+    workTimesService
+      .getWorkTime()
+      .then((result) => setWorkTimes(result.data.data));
+  }, []);
+
   //   "employer": {"id": 22},
-  //   "id": 0,
-  //   "jobPosition": {"id": 2},
-  //   "openPositionQty": 3,
-  //   "salaryMax": 1500,
-  //   "salaryMin": 2000
-
-  //     }
 
   const initialValues = {
     companyName: "",
@@ -34,7 +49,7 @@ export default function JobAdvertForm() {
     description: "",
     salaryMin: "",
     salaryMax: "",
-    openPosition: "",
+    openPositionQty: "",
     applicationDeadline: "",
     jobPosition: "",
     workType: "",
@@ -48,7 +63,7 @@ export default function JobAdvertForm() {
     description: Yup.string()
       .max(1000, "Must be 1000 characters or less")
       .required("Required"),
-    openPosition: Yup.number().required("Required"),
+    openPositionQty: Yup.number().required("Required"),
     salaryMin: Yup.number().required("Required"),
     salaryMax: Yup.number().required("Required"),
   });
@@ -83,7 +98,7 @@ export default function JobAdvertForm() {
           </KodlamaioSelectInput>
 
           <KodlamaioTextInput
-            name="openPosition"
+            name="openPositionQty"
             type="number"
             placeholder="Açık Pozisyon Sayısı Giriniz"
           />
@@ -106,23 +121,30 @@ export default function JobAdvertForm() {
           />
 
           <KodlamaioSelectInput name="jobPosition">
-            <option value="">Pozisyonu Seçiniz</option>
-            <option value="designer">Designer</option>
-            <option value="development">Developer</option>
-            <option value="product">Product Manager</option>
-            <option value="other">Other</option>
+            <option value="">Pozisyon Seçiniz</option>
+            {jobPositions.map((jobPosition) => (
+              <option key={jobPosition.id} value={jobPosition.id}>
+                {jobPosition.name}
+              </option>
+            ))}
           </KodlamaioSelectInput>
 
           <KodlamaioSelectInput name="workType">
             <option value="">Çalışma Şeklini Seçiniz</option>
-            <option value="Uzaktan">Uzaktan</option>
-            <option value="Lokal">Lokal</option>
+            {workTypes.map((workType) => (
+              <option key={workType.id} value={workType.id}>
+                {workType.name}
+              </option>
+            ))}
           </KodlamaioSelectInput>
 
           <KodlamaioSelectInput name="workTime">
             <option value="">Çalışma Zamanını Seçiniz</option>
-            <option value="Tam Zamanlı">Tam Zamanlı</option>
-            <option value="Yarı Zamanlı">Yarı Zamanlı</option>
+            {workTimes.map((workTime) => (
+              <option key={workTime.id} value={workTime.id}>
+                {workTime.name}
+              </option>
+            ))}
           </KodlamaioSelectInput>
 
           <KodlamaioDateInput
