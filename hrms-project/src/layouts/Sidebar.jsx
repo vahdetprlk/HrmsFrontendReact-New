@@ -11,7 +11,7 @@ export default function Sidebar() {
 
           <Menu.Menu>
             <Menu.Item as={NavLink} to="/applied-job-adverts" name="başvurulan ilanlar" />
-            <Menu.Item name="consumer" />
+            <Menu.Item as={NavLink} to="/job-advert-form" name="İş İlanı Formu" />
           </Menu.Menu>
         </Menu.Item>
 

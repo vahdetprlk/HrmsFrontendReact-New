@@ -10,8 +10,10 @@ import CityService from "../services/cityService";
 import JobPositionService from "../services/jobPositionService";
 import WorkTypeService from "../services/workTypeService";
 import WorkTimeService from "../services/workTimeService";
+import EmployerService from "../services/employerService";
 
 export default function JobAdvertForm() {
+  const [employer, setEmployer] = useState([]);
   const [cities, setCities] = useState([]);
   const [jobPositions, setJobPositions] = useState([]);
   const [workTypes, setWorkTypes] = useState([]);
@@ -20,6 +22,8 @@ export default function JobAdvertForm() {
   useEffect(() => {
     let cityService = new CityService();
 
+    let employerService = new EmployerService();
+
     let jobPositionService = new JobPositionService();
 
     let workTypeService = new WorkTypeService();
@@ -27,6 +31,10 @@ export default function JobAdvertForm() {
     let workTimesService = new WorkTimeService();
 
     cityService.getCity().then((result) => setCities(result.data.data));
+
+    employerService
+      .getEmployer()
+      .then((result) => setEmployer(result.data.data));
 
     jobPositionService
       .getJobPosition()
@@ -41,8 +49,6 @@ export default function JobAdvertForm() {
       .then((result) => setWorkTimes(result.data.data));
   }, []);
 
-  //   "employer": {"id": 22},
-
   const initialValues = {
     companyName: "",
     city: "",
@@ -54,18 +60,24 @@ export default function JobAdvertForm() {
     jobPosition: "",
     workType: "",
     workTime: "",
+    employer: 12, //Geçici
   };
 
   const schema = Yup.object({
     companyName: Yup.string()
       .max(50, "Must be 50 characters or less")
       .required("Required"),
+    // city: Yup.number().required("Required"),
     description: Yup.string()
       .max(1000, "Must be 1000 characters or less")
       .required("Required"),
     openPositionQty: Yup.number().required("Required"),
     salaryMin: Yup.number().required("Required"),
     salaryMax: Yup.number().required("Required"),
+    applicationDeadline: Yup.date().required("Required"),
+    workType: Yup.number().required("Required"),
+    workTime: Yup.number().required("Required"),
+    jobPosition: Yup.number().required("Required"),
   });
 
   return (
@@ -75,10 +87,38 @@ export default function JobAdvertForm() {
         initialValues={initialValues}
         validationSchema={schema}
         onSubmit={(values, { setSubmitting }) => {
-          setTimeout(() => {
-            console.log(JSON.stringify(values, null, 2));
-            setSubmitting(false);
-          }, 400);
+          values.city = parseInt(values.city);
+          values.jobPosition = parseInt(values.jobPosition);
+          values.workTime = parseInt(values.workTime);
+          values.workType = parseInt(values.workType);
+          values.employer = parseInt(values.employer);
+
+          const employers = [{ id: 12 }, { id: 22 }];
+
+          values.employer = employers.filter((e) => e.id === values.employer);
+          values.employer = values.employer[0];
+          console.log(values.employer);
+
+          values.jobPosition = jobPositions.filter(
+            (j) => j.id === values.jobPosition
+          );
+          values.jobPosition = values.jobPosition[0];
+          console.log(values.jobPosition);
+
+          values.workTime = workTimes.filter((w) => w.id === values.workTime);
+          values.workTime = values.workTime[0];
+          console.log(values.workTime);
+
+          values.workType = workTypes.filter((w) => w.id === values.workType);
+          values.workType = values.workType[0];
+          console.log(values.workType);
+
+          values.city = cities.filter((c) => c.id === values.city);
+          values.city = values.city[0];
+          console.log(values.city);
+
+          // console.log(JSON.stringify(values, null, 2));
+          console.log(values);
         }}
       >
         <Form className="ui form">
@@ -122,6 +162,7 @@ export default function JobAdvertForm() {
 
           <KodlamaioSelectInput name="jobPosition">
             <option value="">Pozisyon Seçiniz</option>
+
             {jobPositions.map((jobPosition) => (
               <option key={jobPosition.id} value={jobPosition.id}>
                 {jobPosition.name}

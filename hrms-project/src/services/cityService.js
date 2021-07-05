@@ -6,5 +6,7 @@ export default class cityService  {
        return axios.get("http://localhost:8080/api/cities/getall")
     }
  
-    
+    getCityById(id){
+        return axios.get("http://localhost:8080/api/cities/getById?id="+id)
+    }
 }
