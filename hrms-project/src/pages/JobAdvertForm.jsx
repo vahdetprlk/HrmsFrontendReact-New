@@ -1,172 +1,203 @@
-import React from "react";
-import { Formik, Form, useField} from "formik";
+import React, { useEffect, useState } from "react";
+import { Formik, Form } from "formik";
 import * as Yup from "yup";
+import KodlamaioTextInput from "../utilities/customFormControls/KodlamaioTextInput";
+import { Button } from "semantic-ui-react";
+import KodlamaioDateInput from "../utilities/customFormControls/KodlamaioDateInput";
+import KodlamaioTextArea from "../utilities/customFormControls/KodlamaioTextArea";
+import KodlamaioSelectInput from "../utilities/customFormControls/KodlamaioSelectInput";
+import CityService from "../services/cityService";
+import JobPositionService from "../services/jobPositionService";
+import WorkTypeService from "../services/workTypeService";
+import WorkTimeService from "../services/workTimeService";
+import EmployerService from "../services/employerService";
 
-
-const MyTextInput = ({ label, ...props }) => {
-  const [field, meta] = useField(props);
-  return (
-    <>
-      <label htmlFor={props.id || props.name}>{label}</label>
-      <input className="text-imput" {...field} {...props} />
-      {meta.touched && meta.error ? (
-        <div className="error">{meta.error}</div>
-      ) : null}
-    </>
-  );
-};
-
-const MyDateInput = ({ label, ...props }) => {
-  const [field, meta] = useField(props);
-  return (
-    <>
-      <label htmlFor={props.id || props.name}>{label}</label>
-      <input className="datetime-local" {...field} {...props} />
-      {meta.touched && meta.error ? (
-        <div className="error">{meta.error}</div>
-      ) : null}
-    </>
-  );
-};
-
-const MyTextArea = ({ label, ...props }) => {
-  const [field, meta] = useField(props);
-  return (
-    <>
-      <label htmlFor={props.id || props.name}>{label}</label>
-      <textarea className="text-area" {...field} {...props} />
-      {meta.touched && meta.error ? (
-        <div className="error">{meta.error}</div>
-      ) : null}
-    </>
-  );
-};
-
-
-const MySelect = ({ label, ...props }) => {
-  const [field, meta] = useField(props);
-  return (
-    <div>
-      <label htmlFor={props.id || props.name}>{label}</label>
-      <select {...field} {...props} />
-      {meta.touched && meta.error ? (
-        <div className="error">{meta.error}</div>
-      ) : null}
-    </div>
-  );
-};
 export default function JobAdvertForm() {
+  const [employer, setEmployer] = useState([]);
+  const [cities, setCities] = useState([]);
+  const [jobPositions, setJobPositions] = useState([]);
+  const [workTypes, setWorkTypes] = useState([]);
+  const [workTimes, setWorkTimes] = useState([]);
+
+  useEffect(() => {
+    let cityService = new CityService();
+
+    let employerService = new EmployerService();
+
+    let jobPositionService = new JobPositionService();
+
+    let workTypeService = new WorkTypeService();
+
+    let workTimesService = new WorkTimeService();
+
+    cityService.getCity().then((result) => setCities(result.data.data));
+
+    employerService
+      .getEmployer()
+      .then((result) => setEmployer(result.data.data));
+
+    jobPositionService
+      .getJobPosition()
+      .then((result) => setJobPositions(result.data.data));
+
+    workTypeService
+      .getWorkType()
+      .then((result) => setWorkTypes(result.data.data));
+
+    workTimesService
+      .getWorkTime()
+      .then((result) => setWorkTimes(result.data.data));
+  }, []);
+
+  const initialValues = {
+    companyName: "",
+    city: "",
+    description: "",
+    salaryMin: "",
+    salaryMax: "",
+    openPositionQty: "",
+    applicationDeadline: "",
+    jobPosition: "",
+    workType: "",
+    workTime: "",
+    employer: 12, //Geçici
+  };
+
+  const schema = Yup.object({
+    companyName: Yup.string()
+      .max(50, "Must be 50 characters or less")
+      .required("Required"),
+    // city: Yup.number().required("Required"),
+    description: Yup.string()
+      .max(1000, "Must be 1000 characters or less")
+      .required("Required"),
+    openPositionQty: Yup.number().required("Required"),
+    salaryMin: Yup.number().required("Required"),
+    salaryMax: Yup.number().required("Required"),
+    applicationDeadline: Yup.date().required("Required"),
+    workType: Yup.number().required("Required"),
+    workTime: Yup.number().required("Required"),
+    jobPosition: Yup.number().required("Required"),
+  });
+
   return (
     <>
       <h1>Yeni İş İlanı</h1>
       <Formik
-        initialValues={{
-          companyName: "",
-          city: "",
-          description: "",
-          salaryMin: "",
-          salaryMax: "",
-          openPosition: "",
-          deadlineDate: "",
-          jobPosition: "",
-          workType: "",
-          workTime: "",
-        }}
-        validationSchema={Yup.object({
-          companyName: Yup.string()
-            .max(50, "Must be 50 characters or less")
-            .required("Required"),
-          city: Yup.string()
-            .max(20, "Must be 20 characters or less")
-            .required("Required"),
-          description: Yup.string()
-            .max(1000, "Must be 1000 characters or less")
-            .required("Required"),
-          openPosition: Yup.number().required("Required"),
-          salaryMin: Yup.number().required("Required"),
-          salaryMax: Yup.number().required("Required"),
-        })}
-
+        initialValues={initialValues}
+        validationSchema={schema}
         onSubmit={(values, { setSubmitting }) => {
-          setTimeout(() => {
-            alert(JSON.stringify(values, null, 2));
-            setSubmitting(false);
-          }, 400);
+          values.city = parseInt(values.city);
+          values.jobPosition = parseInt(values.jobPosition);
+          values.workTime = parseInt(values.workTime);
+          values.workType = parseInt(values.workType);
+          values.employer = parseInt(values.employer);
+
+          const employers = [{ id: 12 }, { id: 22 }];
+
+          values.employer = employers.filter((e) => e.id === values.employer);
+          values.employer = values.employer[0];
+          console.log(values.employer);
+
+          values.jobPosition = jobPositions.filter(
+            (j) => j.id === values.jobPosition
+          );
+          values.jobPosition = values.jobPosition[0];
+          console.log(values.jobPosition);
+
+          values.workTime = workTimes.filter((w) => w.id === values.workTime);
+          values.workTime = values.workTime[0];
+          console.log(values.workTime);
+
+          values.workType = workTypes.filter((w) => w.id === values.workType);
+          values.workType = values.workType[0];
+          console.log(values.workType);
+
+          values.city = cities.filter((c) => c.id === values.city);
+          values.city = values.city[0];
+          console.log(values.city);
+
+          // console.log(JSON.stringify(values, null, 2));
+          console.log(values);
         }}
       >
-        <Form>
-          <MyTextInput
-            label="Firma Adı"
+        <Form className="ui form">
+          <KodlamaioTextInput
             name="companyName"
             type="text"
             placeholder="Firma Adı Giriniz"
           />
-            <MyTextInput
-            label="Şehir"
-            name="city"
-            type="text"
-            placeholder="Şehir Giriniz"
-          />
-          <MyTextInput
-            label="Açık Pozisyon Sayısı"
-            name="openPosition"
+
+          <KodlamaioSelectInput name="city">
+            <option value="">Şehir Seçiniz</option>
+            {cities.map((city) => (
+              <option key={city.id} value={city.id}>
+                {city.name}
+              </option>
+            ))}
+          </KodlamaioSelectInput>
+
+          <KodlamaioTextInput
+            name="openPositionQty"
             type="number"
-            placeholder="1"
+            placeholder="Açık Pozisyon Sayısı Giriniz"
           />
 
-          <MyTextInput
-            label="En Düşük Maaş"
+          <KodlamaioTextInput
             name="salaryMin"
             type="number"
-            placeholder="0"
+            placeholder="Minimum Maaşı Giriniz"
           />
-          <MyTextInput
-            label="En Yüksek Maaş"
+          <KodlamaioTextInput
             name="salaryMax"
             type="number"
-            placeholder="0"
+            placeholder="Maximum Maaşı Giriniz"
           />
-     
 
-          <MyTextArea
-            label="Açıklama"
+          <KodlamaioTextArea
             name="description"
             rows="6"
             placeholder="İş Açıklaması Giriniz"
           />
 
-          <MySelect label="Pozisyonlar" name="jobPosition">
-            <option value="">Pozisyonu Seçiniz</option>
-            <option value="designer">Designer</option>
-            <option value="development">Developer</option>
-            <option value="product">Product Manager</option>
-            <option value="other">Other</option>
-          </MySelect>
+          <KodlamaioSelectInput name="jobPosition">
+            <option value="">Pozisyon Seçiniz</option>
 
-          <MySelect label="Çalışma Şekli" name="workType">
+            {jobPositions.map((jobPosition) => (
+              <option key={jobPosition.id} value={jobPosition.id}>
+                {jobPosition.name}
+              </option>
+            ))}
+          </KodlamaioSelectInput>
+
+          <KodlamaioSelectInput name="workType">
             <option value="">Çalışma Şeklini Seçiniz</option>
-            <option value="Uzaktan">Uzaktan</option>
-            <option value="Lokal">Lokal</option>
-          </MySelect>
+            {workTypes.map((workType) => (
+              <option key={workType.id} value={workType.id}>
+                {workType.name}
+              </option>
+            ))}
+          </KodlamaioSelectInput>
 
-          <MySelect label="Çalışma Zamanı" name="workTime">
+          <KodlamaioSelectInput name="workTime">
             <option value="">Çalışma Zamanını Seçiniz</option>
-            <option value="Tam Zamanlı">Tam Zamanlı</option>
-            <option value="Yarı Zamanlı">Yarı Zamanlı</option>
-          </MySelect>
+            {workTimes.map((workTime) => (
+              <option key={workTime.id} value={workTime.id}>
+                {workTime.name}
+              </option>
+            ))}
+          </KodlamaioSelectInput>
 
-          <MyDateInput
+          <KodlamaioDateInput
             label="İlan Bitiş Tarihi"
-            name="deadlineDate"
+            name="applicationDeadline"
             type="date"
             placeholder="Tarih Giriniz"
           />
 
-          
-
-          <button type="submit">
-            ekle
-          </button>
+          <Button style={{ marginTop: "10px" }} color="green" type="submit">
+            Ekle
+          </Button>
         </Form>
       </Formik>
     </>

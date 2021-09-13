@@ -1,4 +1,5 @@
 import React from "react";
+import { NavLink } from "react-router-dom";
 import { Menu } from "semantic-ui-react";
 
 export default function Sidebar() {
@@ -9,8 +10,8 @@ export default function Sidebar() {
           <Menu.Header>Products</Menu.Header>
 
           <Menu.Menu>
-            <Menu.Item name="enterprise" />
-            <Menu.Item name="consumer" />
+            <Menu.Item as={NavLink} to="/applied-job-adverts" name="başvurulan ilanlar" />
+            <Menu.Item as={NavLink} to="/job-advert-form" name="İş İlanı Formu" />
           </Menu.Menu>
         </Menu.Item>
 

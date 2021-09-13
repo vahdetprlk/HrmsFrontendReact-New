@@ -1,9 +1,16 @@
 import React, { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
-import { Icon, Menu, Table } from "semantic-ui-react";
+import { Button, Icon, Menu, Table } from "semantic-ui-react";
 import JobAdvertService from "../services/jobAdvertService";
+import { applyToJobAdvert } from "../store/actions/jobAdvertActions";
+
 
 export default function JobAdvertList() {
+
+  const dispatch = useDispatch()
+
+
   const [jobAdverts, setJobAdverts] = useState([]);
 
   useEffect(() => {
@@ -11,6 +18,15 @@ export default function JobAdvertList() {
 
     jobAdvertService.getJobAdvert().then((result) => setJobAdverts(result.data.data));
   }, []);
+
+
+  const handleApplyToJobAdvert  =(jobAdvert)=>{
+    dispatch(applyToJobAdvert(jobAdvert));
+    
+    
+
+  }
+
 
   return (
     <div>
@@ -22,6 +38,7 @@ export default function JobAdvertList() {
             <Table.HeaderCell>Yer</Table.HeaderCell>
             <Table.HeaderCell>Maaş Bilgisi</Table.HeaderCell>
             <Table.HeaderCell>Açık Pozisyon Adedi</Table.HeaderCell>
+            <Table.HeaderCell></Table.HeaderCell>
           </Table.Row>
         </Table.Header>
 
@@ -35,6 +52,7 @@ export default function JobAdvertList() {
                 {jobAdvert.salaryMin + " - " + jobAdvert.salaryMax}
               </Table.Cell>
               <Table.Cell>{jobAdvert.openPositionQty}</Table.Cell>
+              <Table.Cell><Button onClick={()=>handleApplyToJobAdvert(jobAdvert)}>Başvuru Yap</Button></Table.Cell>
             </Table.Row>
           ))}
         </Table.Body>
